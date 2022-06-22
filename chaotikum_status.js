@@ -1,27 +1,39 @@
-const textColor = Color.black()
+const params = args.widgetParameter ? args.widgetParameter.split(",") : [];
 
-if ( config.runsInWidget ) {
-    const widget = await createWidget()
-    Script.setWidget( widget )
-    Script.complete()
+const isDarkTheme = params?.[0] === 'dark';
+const padding = 2;
+
+const widget = new ListWidget();
+if (isDarkTheme) {
+ widget.backgroundColor = new Color('#1C1C1E');; 
+}
+widget.setPadding(padding, padding, padding, padding);
+
+widget.url = 'https://status.chaotikum.org/';
+
+const headerStack = widget.addStack();
+headerStack.setPadding(0, 0, 25, 0);
+const headerText = headerStack.addText("Nobreakspace Status");
+headerText.font = Font.mediumSystemFont(16);
+if (isDarkTheme) {
+    headerText.textColor = new Color('#FFFFFF');
 }
 
 async function getData(){
-    const url = 'https://status.chaotikum.org/spaceapi.json'
-    const r = new Request( url )
-    const body = await r.loadJSON()
+  const url = 'https://status.chaotikum.org/spaceapi.json'
+  const r = new Request( url )
+  const body = await r.loadJSON()
 
-    return body
+  return body
 }
 
 async function createWidget() {
-    const widget = new ListWidget()
+    const rowStack = widget.addStack();
+    rowStack.setPadding(0, 0, 20, 0);
+    rowStack.layoutHorizontally();
 
     let response = await getData()
     let isOpen = response.state.open
-    let unixTimestamp = response.state.lastchange
-    let lastChangeDate = new Date(unixTimestamp * 1000)
-    let lastChangeString = `${lastChangeDate.getMonth() + 1}/${lastChangeDate.getDate()} ${zeroPad(lastChangeDate.getHours())}:${zeroPad(lastChangeDate.getMinutes())}`
     let status = ""
     let statusColor = Color.black()
     if(isOpen){
@@ -32,52 +44,20 @@ async function createWidget() {
         status = "Geschlossen"
         statusColor = Color.red()
     }
-    const name = widget.addText( status )
-    name.font = Font.boldSystemFont( 36 )
-    name.centerAlignText()
-    name.textColor = statusColor
+    const name = rowStack.addText( status )
+    name.font = Font.mediumSystemFont(16);
 
+    let unixTimestamp = response.state.lastchange
+    let lastChangeDate = new Date(unixTimestamp * 1000)
+    const date = rowStack.addDate(lastChangeDate)
+    date.applyTimerStyle()
+    date.font = Font.mediumSystemFont(16);
 
-
-    const subscribersLabel = widget.addText( "seit " + lastChangeString )
-    subscribersLabel.font = Font.semiboldSystemFont( 26 )
-    subscribersLabel.centerAlignText()
-    subscribersLabel.textColor = textColor
-
-    widget.addSpacer()
-
-    let reloadStack = widget.addStack()
-    reloadStack.layoutHorizontally()
-    reloadStack.centerAlignContent()
-
-    reloadStack.addSpacer()
-
-    let reloadSymbol = SFSymbol.named("arrow.triangle.2.circlepath")
-    let reloadImage = reloadStack.addImage(reloadSymbol.image)
-    reloadImage.tintColor = Color.white()
-    reloadImage.imageSize = new Size(8, 8)
-    reloadImage.imageOpacity = 0.9
-    reloadImage.centerAlignImage()
-
-    reloadStack.addSpacer(2)
-
-
-    reloadStack.addSpacer()
-
-    const startColor = new Color("#c3c3c3")
-    const endColor = new Color("#a4a4a4")
-    const gradient = new LinearGradient()
-    gradient.colors = [startColor, endColor]
-    gradient.locations = [0.0, 1]
-    widget.backgroundGradient = gradient
-
-    return widget
+   if (isDarkTheme) {
+     date.textColor = new Color('#FFFFFF');
+   }
 }
 
-function zeroPad(numToPad) {
-    if (numToPad > 9) {
-        return numToPad
-    } else {
-        return `0${numToPad}`
-    }
-}
+const widget = await createWidget()
+Script.setWidget( widget )
+Script.complete()
