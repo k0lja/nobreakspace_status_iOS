@@ -7,7 +7,7 @@ if ( config.runsInWidget ) {
 }
 
 async function getData(){
-    const url = 'https://status.chaotikum.org/spaceapi.json';
+    const url = 'https://status.chaotikum.org/spaceapi.json'
     const r = new Request( url )
     const body = await r.loadJSON()
 
@@ -17,20 +17,29 @@ async function getData(){
 async function createWidget() {
     const widget = new ListWidget()
 
-    let response = await getData();
-    let status = response.state.open;
-    let unixTimestamp = response.state.lastchange;
-    let lastChangeDate = new Date(unixTimestamp * 1000);
+    let response = await getData()
+    let isOpen = response.state.open
+    let unixTimestamp = response.state.lastchange
+    let lastChangeDate = new Date(unixTimestamp * 1000)
     let lastChangeString = `${lastChangeDate.getMonth() + 1}/${lastChangeDate.getDate()} ${zeroPad(lastChangeDate.getHours())}:${zeroPad(lastChangeDate.getMinutes())}`
-
+    let status = ""
+    let statusColor = Color.black()
+    if(isOpen){
+        status = "Offen"
+        statusColor = Color.green()
+        
+    } else {
+        status = "Geschlossen"
+        statusColor = Color.red()
+    }
     const name = widget.addText( status )
     name.font = Font.boldSystemFont( 36 )
     name.centerAlignText()
-    name.textColor = textColor
+    name.textColor = statusColor
 
 
 
-    const subscribersLabel = widget.addText( lastChange )
+    const subscribersLabel = widget.addText( "seit " + lastChangeString )
     subscribersLabel.font = Font.semiboldSystemFont( 26 )
     subscribersLabel.centerAlignText()
     subscribersLabel.textColor = textColor
