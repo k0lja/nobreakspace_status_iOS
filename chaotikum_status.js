@@ -11,10 +11,10 @@ widget.setPadding(padding, padding, padding, padding);
 
 widget.url = 'https://status.chaotikum.org/';
 
-const headerStack = widget.addStack();
-headerStack.setPadding(0, 0, 25, 0);
-const headerText = headerStack.addText("Nobreakspace Status");
+const headerText = widget.addText("Nobreakspace Status");
 headerText.font = Font.mediumSystemFont(16);
+headerText.centerAlignText()
+widget.addText("")
 if (isDarkTheme) {
     headerText.textColor = new Color('#FFFFFF');
 }
@@ -28,11 +28,9 @@ async function getData(){
 }
 
 async function createWidget() {
-    const rowStack = widget.addStack();
-    rowStack.setPadding(0, 0, 20, 0);
-    rowStack.layoutHorizontally();
 
     let response = await getData()
+    log(response)
     let isOpen = response.state.open
     let status = ""
     let statusColor = Color.black()
@@ -44,20 +42,23 @@ async function createWidget() {
         status = "Geschlossen"
         statusColor = Color.red()
     }
-    const name = rowStack.addText( status )
+    const name = widget.addText( status )
     name.font = Font.mediumSystemFont(16);
+    name.textColor = statusColor
+    name.centerAlignText()
 
     let unixTimestamp = response.state.lastchange
     let lastChangeDate = new Date(unixTimestamp * 1000)
-    const date = rowStack.addDate(lastChangeDate)
+    const date = widget.addDate(lastChangeDate)
     date.applyTimerStyle()
     date.font = Font.mediumSystemFont(16);
+    date.centerAlignText()
 
    if (isDarkTheme) {
      date.textColor = new Color('#FFFFFF');
    }
 }
 
-const widget = await createWidget()
+await createWidget()
 Script.setWidget( widget )
 Script.complete()
