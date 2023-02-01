@@ -20,7 +20,7 @@ if (isDarkTheme) {
 }
 
 async function getData(){
-  const url = 'https://status.chaotikum.org/spaceapi.json'
+  const url = 'https://status.nobreakspace.org/spaceapi.json'
   const r = new Request( url )
   const body = await r.loadJSON()
 
